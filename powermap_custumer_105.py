@@ -325,48 +325,29 @@ def update_threshold_values():
 
 # ---------------------------- Layout GUI ------------------------------- #
 
-# Radiobutton
-
-
-def radio_used():
-    print(radio_state.get())
-
-
-# Variable to hold on to which radio button value is checked.
-radio_state = IntVar()
-radiobutton1 = Radiobutton(text="Full power", value=1,
-                           variable=radio_state, command=radio_used)
-radiobutton2 = Radiobutton(text="Mid power", value=2,
-                           variable=radio_state, command=radio_used)
-radiobutton3 = Radiobutton(text="Low power", value=3,
-                           variable=radio_state, command=radio_used)
-
-radiobutton1.grid(row=0, column=0, columnspan=2)
-radiobutton2.grid(row=0, column=3, columnspan=2)
-radiobutton3.grid(row=0, column=6, columnspan=2)
 
 reset_button = Button(text="Reset Powermap to EVE",
                       command=reset_powermap_to_EVE)
-reset_button.grid(row=1, columnspan=tablewidth+1, pady=5)
+reset_button.grid(row=0, columnspan=tablewidth+1, pady=5)
 
 # add soc threshold entries and label
 label_soc_values = Label(text="Gauge (%)")
-label_soc_values.grid(row=2, column=0)
+label_soc_values.grid(row=1, column=0)
 
 counter = 0
 for column in range(len(seuils_soc)):
     entries_soc[counter] = Entry(width=WIDTH_ENTRIES)
     entries_soc[counter].insert(END, string=seuils_soc[column])
-    entries_soc[counter].grid(row=2, column=column+1)
+    entries_soc[counter].grid(row=1, column=column+1)
     counter += 1
 
 # add Updage Button
 update_button = Button(text="Update", command=update_threshold_values)
-update_button.grid(row=2, column=tablewidth)
+update_button.grid(row=1, column=tablewidth)
 
 # add T threshold entries and label
 label_T_values = Label(text="Temp (°C)")
-label_T_values.grid(row=3, column=0)
+label_T_values.grid(row=2, column=0)
 counter = 0
 for column in range(len(seuils_Temperature)):
     entries_T[counter] = Entry(width=WIDTH_ENTRIES)
@@ -375,7 +356,7 @@ for column in range(len(seuils_Temperature)):
     else:
         entries_T[counter].insert(END, string=seuils_Temperature[column])
     entries_T[counter].grid(
-        row=3 + math.floor(column/tablewidth), column=column % tablewidth + 1)
+        row=2 + math.floor(column/tablewidth), column=column % tablewidth + 1)
     counter += 1
 
 # add soc thresholds labels
@@ -390,7 +371,7 @@ for column in range(tablewidth):
     else:
         seuils_soc_labels[counter] = Label(
             text=str(seuils_soc[column-1]) + ".." + str(seuils_soc[column]))
-    seuils_soc_labels[counter].grid(row=5, column=column+1)
+    seuils_soc_labels[counter].grid(row=4, column=column+1)
     counter += 1
 
 # add Temperature thresholds labels
@@ -424,7 +405,7 @@ for row in range(tableheight):
             seuils_T_labels[counter] = Label(
                 text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]))
 
-    seuils_T_labels[counter].grid(row=row+6, column=0)
+    seuils_T_labels[counter].grid(row=row+5, column=0)
     counter += 1
 
 # add data entries
@@ -433,11 +414,11 @@ for row in range(tableheight):
     for column in range(tablewidth):
         entries[counter] = Entry(width=WIDTH_ENTRIES)
         entries[counter].insert(END, string=powermap_full[row][column])
-        entries[counter].grid(row=row+6, column=column+1)
+        entries[counter].grid(row=row+5, column=column+1)
         counter += 1
 
 # generate csv button
 generate_csv_button = Button(text="Generate CSV", command=generate_csv_file)
-generate_csv_button.grid(row=tableheight+6, columnspan=tablewidth+1, pady=5)
+generate_csv_button.grid(row=tableheight+5, columnspan=tablewidth+1, pady=5)
 
 window.mainloop()
