@@ -1,6 +1,7 @@
 import csv
 from tkinter import *
 import math
+from tkinter.ttk import Notebook
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -12,13 +13,19 @@ index_parameter = 0
 FIRST_ADDRESS = '0640'
 adress_int = int(FIRST_ADDRESS, base=16)
 entries = {}
+entries_mid_power = {}
+entries_low_power = {}
 entries_soc = {}
 entries_T = {}
 tableheight = 15
 tablewidth = 7
 header = []
 seuils_soc_labels = {}
+seuils_soc_mid_labels = {}
+seuils_soc_low_labels = {}
 seuils_T_labels = {}
+seuils_T_mid_labels = {}
+seuils_T_low_labels = {}
 WIDTH_ENTRIES = 7
 seuils_soc = [5, 10, 15, 20, 30, 35]
 seuils_Temperature = [-15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
@@ -201,7 +208,7 @@ powermap_full = [
     [19, 38, 75, 113, 150, 300, 300],
 ]
 
-# ---------------------------- Generate csv file ------------------------------- #
+######################################################## Generate csv file ##################################################
 
 
 def generate_csv_file():
@@ -226,8 +233,8 @@ def generate_csv_file():
     for index_T in range(len(powermap_full)):
         for index_soc in range(len(powermap_full[0])):
             adress_hex = ('0' + hex(adress_int_data).lstrip("0x")).upper()
-            param_int = int('0b00' + bin(int(entries[index_T * tablewidth + index_soc].get()))[2:].zfill(10) + bin(powermap_mid[index_T]
-                                                                                                                   [index_soc])[2:].zfill(10) + bin(powermap_low[index_T][index_soc])[2:].zfill(10), base=2)
+            param_int = int('0b00' + bin(int(entries[index_T * tablewidth + index_soc].get()))[2:].zfill(10) + bin(int(
+                entries_mid_power[index_T * tablewidth + index_soc].get()))[2:].zfill(10) + bin(int(entries_low_power[index_T * tablewidth + index_soc].get()))[2:].zfill(10), base=2)
             param_hex = hex(param_int).lstrip("0x").zfill(8).upper()
 
             data.append([f'{6+index_T*6+index_soc}', f'PAR_IMD_SOC{index_soc}_T{index_T}', adress_hex,
@@ -241,10 +248,12 @@ def generate_csv_file():
         # write multiple rows
         writer.writerows(data)
 
+    update_threshold_labels()
+
     # Close opend file
     f.close()
 
-# ---------------------------- Reset Powermap to EVE ------------------------------- #
+################################################ Reset Powermap to EVE ########################################################
 
 
 def reset_powermap_to_EVE():
@@ -253,6 +262,12 @@ def reset_powermap_to_EVE():
         for column in range(tablewidth):
             entries[counter].delete(0, END)
             entries[counter].insert(0, string=powermap_full[row][column])
+            entries_mid_power[counter].delete(0, END)
+            entries_mid_power[counter].insert(
+                0, string=powermap_mid[row][column])
+            entries_low_power[counter].delete(0, END)
+            entries_low_power[counter].insert(
+                0, string=powermap_low[row][column])
             counter += 1
 
     counter = 0
@@ -271,23 +286,35 @@ def reset_powermap_to_EVE():
         entries_soc[counter].insert(END, string=seuils_soc[column])
         counter += 1
 
-    update_threshold_values()
+    update_threshold_labels()
 
-# ---------------------------- Update thresholds  ------------------------------- #
+################################################### Update thresholds labels ######################################################
 
 
-def update_threshold_values():
+def update_threshold_labels():
 
     counter = 0
     for column in range(tablewidth):
         if column == 0:
             seuils_soc_labels[counter].config(
                 text="0.." + str(entries_soc[column].get()))
+            seuils_soc_mid_labels[counter].config(
+                text="0.." + str(entries_soc[column].get()))
+            seuils_soc_low_labels[counter].config(
+                text="0.." + str(entries_soc[column].get()))
         elif column == (tablewidth - 1):
             seuils_soc_labels[counter].config(
                 text=str(entries_soc[column-1].get())+"..100")
+            seuils_soc_mid_labels[counter].config(
+                text=str(entries_soc[column-1].get())+"..100")
+            seuils_soc_low_labels[counter].config(
+                text=str(entries_soc[column-1].get())+"..100")
         else:
             seuils_soc_labels[counter].config(
+                text=str(entries_soc[column-1].get()) + ".." + str(entries_soc[column].get()))
+            seuils_soc_mid_labels[counter].config(
+                text=str(entries_soc[column-1].get()) + ".." + str(entries_soc[column].get()))
+            seuils_soc_low_labels[counter].config(
                 text=str(entries_soc[column-1].get()) + ".." + str(entries_soc[column].get()))
         counter += 1
 
@@ -297,35 +324,67 @@ def update_threshold_values():
             if int(entries_T[row].get()) > 127:
                 seuils_T_labels[counter].config(
                     text="-20.." + str(int(entries_T[row].get()) - 256))
+                seuils_T_mid_labels[counter].config(
+                    text="-20.." + str(int(entries_T[row].get()) - 256))
+                seuils_T_low_labels[counter].config(
+                    text="-20.." + str(int(entries_T[row].get()) - 256))
             else:
                 seuils_T_labels[counter].config(
+                    text="-20.." + entries_T[row].get())
+                seuils_T_mid_labels[counter].config(
+                    text="-20.." + entries_T[row].get())
+                seuils_T_low_labels[counter].config(
                     text="-20.." + entries_T[row].get())
         elif row == (tableheight - 1):
             if int(entries_T[row-1].get()) > 127:
                 seuils_T_labels[counter].config(
                     text=str(int(entries_T[row-1].get()) - 256)+"..53")
+                seuils_T_mid_labels[counter].config(
+                    text=str(int(entries_T[row-1].get()) - 256)+"..53")
+                seuils_T_low_labels[counter].config(
+                    text=str(int(entries_T[row-1].get()) - 256)+"..53")
             else:
                 seuils_T_labels[counter].config(
+                    text=entries_T[row-1].get()+"..53")
+                seuils_T_mid_labels[counter].config(
+                    text=entries_T[row-1].get()+"..53")
+                seuils_T_low_labels[counter].config(
                     text=entries_T[row-1].get()+"..53")
         else:
             if (int(entries_T[row-1].get()) > 127) and (int(entries_T[row].get() > 127)):
                 seuils_T_labels[counter].config(text=str(
                     int(entries_T[row-1].get())-256) + ".." + str(int(entries_T[row].get())-256))
+                seuils_T_mid_labels[counter].config(text=str(
+                    int(entries_T[row-1].get())-256) + ".." + str(int(entries_T[row].get())-256))
+                seuils_T_low_labels[counter].config(text=str(
+                    int(entries_T[row-1].get())-256) + ".." + str(int(entries_T[row].get())-256))
             elif ((int(entries_T[row-1].get()) <= 127) and (int(entries_T[row].get()) > 127)):
                 seuils_T_labels[counter].config(
+                    text=str(entries_T[row-1].get()) + ".." + str(int(entries_T[row].get())-256))
+                seuils_T_mid_labels[counter].config(
+                    text=str(entries_T[row-1].get()) + ".." + str(int(entries_T[row].get())-256))
+                seuils_T_low_labels[counter].config(
                     text=str(entries_T[row-1].get()) + ".." + str(int(entries_T[row].get())-256))
             elif ((int(entries_T[row-1].get()) > 127) and (int(entries_T[row].get()) <= 127)):
                 seuils_T_labels[counter].config(
                     text=str(int(entries_T[row-1].get())-256) + ".." + entries_T[row].get())
+                seuils_T_mid_labels[counter].config(
+                    text=str(int(entries_T[row-1].get())-256) + ".." + entries_T[row].get())
+                seuils_T_low_labels[counter].config(
+                    text=str(int(entries_T[row-1].get())-256) + ".." + entries_T[row].get())
             else:
                 seuils_T_labels[counter].config(
+                    text=entries_T[row-1].get() + ".." + entries_T[row].get())
+                seuils_T_mid_labels[counter].config(
+                    text=entries_T[row-1].get() + ".." + entries_T[row].get())
+                seuils_T_low_labels[counter].config(
                     text=entries_T[row-1].get() + ".." + entries_T[row].get())
 
         counter += 1
 
+
+###################################################################################################################################
 # ---------------------------- Layout GUI ------------------------------- #
-
-
 reset_button = Button(text="Reset Powermap to EVE",
                       command=reset_powermap_to_EVE)
 reset_button.grid(row=0, columnspan=tablewidth+1, pady=5)
@@ -341,10 +400,6 @@ for column in range(len(seuils_soc)):
     entries_soc[counter].grid(row=1, column=column+1)
     counter += 1
 
-# add Updage Button
-update_button = Button(text="Update", command=update_threshold_values)
-update_button.grid(row=1, column=tablewidth)
-
 # add T threshold entries and label
 label_T_values = Label(text="Temp (°C)")
 label_T_values.grid(row=2, column=0)
@@ -359,66 +414,205 @@ for column in range(len(seuils_Temperature)):
         row=2 + math.floor(column/tablewidth), column=column % tablewidth + 1)
     counter += 1
 
-# add soc thresholds labels
+# add tabs for choosing power
+tabs = Notebook(window)
+
+full_powermap_tab = Frame(tabs)
+mid_powermap_tab = Frame(tabs)
+low_powermap_tab = Frame(tabs)
+
+tabs.add(full_powermap_tab, text="Full power")
+tabs.add(mid_powermap_tab, text="Mid power")
+tabs.add(low_powermap_tab, text="Low power")
+
+tabs.grid(row=4, column=0, columnspan=8, pady=10)
+
+# generate csv button
+generate_csv_button = Button(text="Generate CSV", command=generate_csv_file)
+generate_csv_button.grid(row=5, columnspan=tablewidth+1, pady=5)
+
+#####################################################################################################################################
+# add soc thresholds labels for full power
 counter = 0
 for column in range(tablewidth):
     if column == 0:
-        seuils_soc_labels[counter] = Label(
-            text="0.." + str(seuils_soc[column]))
+        seuils_soc_labels[counter] = Label(full_powermap_tab,
+                                           text="0.." + str(seuils_soc[column]))
     elif column == (tablewidth - 1):
-        seuils_soc_labels[counter] = Label(
-            text=str(seuils_soc[column-1])+"..100")
+        seuils_soc_labels[counter] = Label(full_powermap_tab,
+                                           text=str(seuils_soc[column-1])+"..100")
     else:
-        seuils_soc_labels[counter] = Label(
-            text=str(seuils_soc[column-1]) + ".." + str(seuils_soc[column]))
-    seuils_soc_labels[counter].grid(row=4, column=column+1)
+        seuils_soc_labels[counter] = Label(full_powermap_tab,
+                                           text=str(seuils_soc[column-1]) + ".." + str(seuils_soc[column]))
+    seuils_soc_labels[counter].grid(row=0, column=column+1)
     counter += 1
 
-# add Temperature thresholds labels
+# add soc thresholds labels for mid power
+counter = 0
+for column in range(tablewidth):
+    if column == 0:
+        seuils_soc_mid_labels[counter] = Label(mid_powermap_tab,
+                                               text="0.." + str(seuils_soc[column]))
+    elif column == (tablewidth - 1):
+        seuils_soc_mid_labels[counter] = Label(mid_powermap_tab,
+                                               text=str(seuils_soc[column-1])+"..100")
+    else:
+        seuils_soc_mid_labels[counter] = Label(mid_powermap_tab,
+                                               text=str(seuils_soc[column-1]) + ".." + str(seuils_soc[column]))
+    seuils_soc_mid_labels[counter].grid(row=0, column=column+1)
+    counter += 1
+
+# add soc thresholds labels for low power
+counter = 0
+for column in range(tablewidth):
+    if column == 0:
+        seuils_soc_low_labels[counter] = Label(low_powermap_tab,
+                                               text="0.." + str(seuils_soc[column]))
+    elif column == (tablewidth - 1):
+        seuils_soc_low_labels[counter] = Label(low_powermap_tab,
+                                               text=str(seuils_soc[column-1])+"..100")
+    else:
+        seuils_soc_low_labels[counter] = Label(low_powermap_tab,
+                                               text=str(seuils_soc[column-1]) + ".." + str(seuils_soc[column]))
+    seuils_soc_low_labels[counter].grid(row=0, column=column+1)
+    counter += 1
+
+################################################################################################################################
+# add Temperature thresholds labels for full power
 counter = 0
 for row in range(tableheight):
     if row == 0:
         if seuils_Temperature[row] > 127:
-            seuils_T_labels[counter] = Label(
-                text="-20.." + str(seuils_Temperature[row] - 256))
+            seuils_T_labels[counter] = Label(full_powermap_tab,
+                                             text="-20.." + str(seuils_Temperature[row] - 256))
         else:
-            seuils_T_labels[counter] = Label(
-                text="-20.." + str(seuils_Temperature[row]))
+            seuils_T_labels[counter] = Label(full_powermap_tab,
+                                             text="-20.." + str(seuils_Temperature[row]))
     elif row == (tableheight - 1):
         if seuils_Temperature[row-1] > 127:
-            seuils_T_labels[counter] = Label(
-                text=str(seuils_Temperature[row-1] - 256)+"..53")
+            seuils_T_labels[counter] = Label(full_powermap_tab,
+                                             text=str(seuils_Temperature[row-1] - 256)+"..53")
         else:
-            seuils_T_labels[counter] = Label(
-                text=str(seuils_Temperature[row-1])+"..53")
+            seuils_T_labels[counter] = Label(full_powermap_tab,
+                                             text=str(seuils_Temperature[row-1])+"..53")
     else:
         if (seuils_Temperature[row-1] > 127) and (seuils_Temperature[row] > 127):
-            seuils_T_labels[counter] = Label(text=str(
+            seuils_T_labels[counter] = Label(full_powermap_tab, text=str(
                 seuils_Temperature[row-1]-256) + ".." + str(seuils_Temperature[row]-256))
         elif (seuils_Temperature[row-1] <= 127) and (seuils_Temperature[row] > 127):
-            seuils_T_labels[counter] = Label(
-                text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]-256))
+            seuils_T_labels[counter] = Label(full_powermap_tab,
+                                             text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]-256))
         elif (seuils_Temperature[row-1] > 127) and (seuils_Temperature[row] <= 127):
-            seuils_T_labels[counter] = Label(
-                text=str(seuils_Temperature[row-1]-256) + ".." + str(seuils_Temperature[row]))
+            seuils_T_labels[counter] = Label(full_powermap_tab,
+                                             text=str(seuils_Temperature[row-1]-256) + ".." + str(seuils_Temperature[row]))
         else:
-            seuils_T_labels[counter] = Label(
-                text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]))
+            seuils_T_labels[counter] = Label(full_powermap_tab,
+                                             text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]))
 
-    seuils_T_labels[counter].grid(row=row+5, column=0)
+    seuils_T_labels[counter].grid(row=row+1, column=0)
     counter += 1
 
-# add data entries
+# add Temperature thresholds labels for mid power
+counter = 0
+for row in range(tableheight):
+    if row == 0:
+        if seuils_Temperature[row] > 127:
+            seuils_T_mid_labels[counter] = Label(mid_powermap_tab,
+                                                 text="-20.." + str(seuils_Temperature[row] - 256))
+        else:
+            seuils_T_mid_labels[counter] = Label(mid_powermap_tab,
+                                                 text="-20.." + str(seuils_Temperature[row]))
+    elif row == (tableheight - 1):
+        if seuils_Temperature[row-1] > 127:
+            seuils_T_mid_labels[counter] = Label(mid_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1] - 256)+"..53")
+        else:
+            seuils_T_mid_labels[counter] = Label(mid_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1])+"..53")
+    else:
+        if (seuils_Temperature[row-1] > 127) and (seuils_Temperature[row] > 127):
+            seuils_T_mid_labels[counter] = Label(mid_powermap_tab, text=str(
+                seuils_Temperature[row-1]-256) + ".." + str(seuils_Temperature[row]-256))
+        elif (seuils_Temperature[row-1] <= 127) and (seuils_Temperature[row] > 127):
+            seuils_T_mid_labels[counter] = Label(mid_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]-256))
+        elif (seuils_Temperature[row-1] > 127) and (seuils_Temperature[row] <= 127):
+            seuils_T_mid_labels[counter] = Label(mid_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1]-256) + ".." + str(seuils_Temperature[row]))
+        else:
+            seuils_T_mid_labels[counter] = Label(mid_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]))
+
+    seuils_T_mid_labels[counter].grid(row=row+1, column=0)
+    counter += 1
+
+# add Temperature thresholds labels for low power
+counter = 0
+for row in range(tableheight):
+    if row == 0:
+        if seuils_Temperature[row] > 127:
+            seuils_T_low_labels[counter] = Label(low_powermap_tab,
+                                                 text="-20.." + str(seuils_Temperature[row] - 256))
+        else:
+            seuils_T_low_labels[counter] = Label(low_powermap_tab,
+                                                 text="-20.." + str(seuils_Temperature[row]))
+    elif row == (tableheight - 1):
+        if seuils_Temperature[row-1] > 127:
+            seuils_T_low_labels[counter] = Label(low_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1] - 256)+"..53")
+        else:
+            seuils_T_low_labels[counter] = Label(low_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1])+"..53")
+    else:
+        if (seuils_Temperature[row-1] > 127) and (seuils_Temperature[row] > 127):
+            seuils_T_low_labels[counter] = Label(low_powermap_tab, text=str(
+                seuils_Temperature[row-1]-256) + ".." + str(seuils_Temperature[row]-256))
+        elif (seuils_Temperature[row-1] <= 127) and (seuils_Temperature[row] > 127):
+            seuils_T_low_labels[counter] = Label(low_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]-256))
+        elif (seuils_Temperature[row-1] > 127) and (seuils_Temperature[row] <= 127):
+            seuils_T_low_labels[counter] = Label(low_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1]-256) + ".." + str(seuils_Temperature[row]))
+        else:
+            seuils_T_low_labels[counter] = Label(low_powermap_tab,
+                                                 text=str(seuils_Temperature[row-1]) + ".." + str(seuils_Temperature[row]))
+
+    seuils_T_low_labels[counter].grid(row=row+1, column=0)
+    counter += 1
+
+#################################################################################################################################
+# add data entries for full power
 counter = 0
 for row in range(tableheight):
     for column in range(tablewidth):
-        entries[counter] = Entry(width=WIDTH_ENTRIES)
+        entries[counter] = Entry(full_powermap_tab, width=WIDTH_ENTRIES)
         entries[counter].insert(END, string=powermap_full[row][column])
-        entries[counter].grid(row=row+5, column=column+1)
+        entries[counter].grid(row=row+1, column=column+1)
         counter += 1
 
-# generate csv button
-generate_csv_button = Button(text="Generate CSV", command=generate_csv_file)
-generate_csv_button.grid(row=tableheight+5, columnspan=tablewidth+1, pady=5)
+# add data entries for mid power
+counter = 0
+for row in range(tableheight):
+    for column in range(tablewidth):
+        entries_mid_power[counter] = Entry(
+            mid_powermap_tab, width=WIDTH_ENTRIES)
+        entries_mid_power[counter].insert(
+            END, string=powermap_mid[row][column])
+        entries_mid_power[counter].grid(row=row+1, column=column+1)
+        counter += 1
+
+# add data entries for low power
+counter = 0
+for row in range(tableheight):
+    for column in range(tablewidth):
+        entries_low_power[counter] = Entry(
+            low_powermap_tab, width=WIDTH_ENTRIES)
+        entries_low_power[counter].insert(
+            END, string=powermap_low[row][column])
+        entries_low_power[counter].grid(row=row+1, column=column+1)
+        counter += 1
+
+##################################################################################################################################
+
 
 window.mainloop()
