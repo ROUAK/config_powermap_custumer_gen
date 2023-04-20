@@ -393,9 +393,30 @@ reset_button.grid(row=0, columnspan=tablewidth+1, pady=5)
 label_soc_values = Label(text="Gauge (%)")
 label_soc_values.grid(row=1, column=0)
 
+# Add entry validation to accept only digits and ignore the rest
+
+
+def callback(P):
+    if str.isnumeric(P.strip('-')) or P == "":
+        return True
+    else:
+        return False
+
+
+def callback_digits(P):
+    if str.isdigit(P) or P == "":
+        return True
+    else:
+        return False
+
+
+vcmd = (window.register(callback))
+vcmd_digits = (window.register(callback_digits))
+
 counter = 0
 for column in range(len(seuils_soc)):
-    entries_soc[counter] = Entry(width=WIDTH_ENTRIES)
+    entries_soc[counter] = Entry(
+        width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'))
     entries_soc[counter].insert(END, string=seuils_soc[column])
     entries_soc[counter].grid(row=1, column=column+1)
     counter += 1
@@ -405,9 +426,11 @@ label_T_values = Label(text="Temp (°C)")
 label_T_values.grid(row=2, column=0)
 counter = 0
 for column in range(len(seuils_Temperature)):
-    entries_T[counter] = Entry(width=WIDTH_ENTRIES)
+    entries_T[counter] = Entry(
+        width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd, '%P'))
     if seuils_Temperature[column] > 127:
-        entries_T[counter].insert(END, string=seuils_Temperature[column] - 256)
+        entries_T[counter].insert(
+            END, string=seuils_Temperature[column] - 256)
     else:
         entries_T[counter].insert(END, string=seuils_Temperature[column])
     entries_T[counter].grid(
@@ -585,7 +608,8 @@ for row in range(tableheight):
 counter = 0
 for row in range(tableheight):
     for column in range(tablewidth):
-        entries[counter] = Entry(full_powermap_tab, width=WIDTH_ENTRIES)
+        entries[counter] = Entry(
+            full_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'))
         entries[counter].insert(END, string=powermap_full[row][column])
         entries[counter].grid(row=row+1, column=column+1)
         counter += 1
@@ -595,7 +619,7 @@ counter = 0
 for row in range(tableheight):
     for column in range(tablewidth):
         entries_mid_power[counter] = Entry(
-            mid_powermap_tab, width=WIDTH_ENTRIES)
+            mid_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'))
         entries_mid_power[counter].insert(
             END, string=powermap_mid[row][column])
         entries_mid_power[counter].grid(row=row+1, column=column+1)
@@ -606,7 +630,7 @@ counter = 0
 for row in range(tableheight):
     for column in range(tablewidth):
         entries_low_power[counter] = Entry(
-            low_powermap_tab, width=WIDTH_ENTRIES)
+            low_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'))
         entries_low_power[counter].insert(
             END, string=powermap_low[row][column])
         entries_low_power[counter].grid(row=row+1, column=column+1)
