@@ -73,7 +73,7 @@ powermap_full = [
     [13, 25, 56, 75,  100, 212, 212],
     [14, 28, 62, 81,  106, 218, 218],
     [16, 31, 66, 87,  112, 225, 225],
-    [16, 33, 68, 94,  112, 243, 243],
+    [16, 33, 68, 94,  122, 243, 243],
     [17, 34, 72, 100, 132, 263, 263],
     [18, 36, 72, 107, 141, 282, 282],
     [19, 38, 75, 113, 150, 300, 300],
@@ -103,7 +103,7 @@ def generate_csv_file():
                 entries_mid_power[index_T * tablewidth + index_soc].get()))[2:].zfill(10) + bin(int(entries_low_power[index_T * tablewidth + index_soc].get()))[2:].zfill(10), base=2)
             param_hex = hex(param_int).lstrip("0x").zfill(8).upper()
 
-            data.append([f'{index_T*6+index_soc}', f'PAR_IMD_SOC{index_soc}_T{index_T}', adress_hex,
+            data.append([f'{134+index_T*6+index_soc}', f'PAR_IMD_SOC{index_soc}_T{index_T}', adress_hex,
                         'IMD', 'Full_Mid_Low_10bits', str(param_int), '', param_hex])
 
             adress_int_data += 4
