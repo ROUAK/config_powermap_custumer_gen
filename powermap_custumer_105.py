@@ -117,7 +117,7 @@ def generate_csv_file():
     # Close opend file
     f.close()
 
-################################################ Reset Powermap to Goupil ########################################################
+################################################ Reset Powermap  ########################################################
 
 
 def reset_powermap_to_Goupil():
@@ -135,11 +135,30 @@ def reset_powermap_to_Goupil():
             counter += 1
 
 
+def reset_powermap_to_Zero():
+    counter = 0
+    for row in range(tableheight):
+        for column in range(tablewidth):
+            entries[counter].delete(0, END)
+            entries[counter].insert(0, string='0')
+            entries_mid_power[counter].delete(0, END)
+            entries_mid_power[counter].insert(
+                0, '0')
+            entries_low_power[counter].delete(0, END)
+            entries_low_power[counter].insert(
+                0, string='0')
+            counter += 1
+
+
 ###################################################################################################################################
 # ---------------------------- Layout GUI ------------------------------- #
 reset_button = Button(text="Reset Powermap to Goupil",
                       command=reset_powermap_to_Goupil)
-reset_button.grid(row=0, columnspan=tablewidth+1, pady=5)
+reset_button.grid(row=0, column=0, columnspan=4, pady=5)
+
+reset_button = Button(text="Reset Powermap to Zero",
+                      command=reset_powermap_to_Zero)
+reset_button.grid(row=0, column=4, columnspan=4, pady=5)
 
 # Add entries validation to accept only digits and ignore the rest
 
