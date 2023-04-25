@@ -344,7 +344,7 @@ counter = 0
 for row in range(tableheight):
     for column in range(tablewidth):
         entries[counter] = Entry(
-            full_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'))
+            full_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'), justify=CENTER)
         entries[counter].insert(END, string=powermap_full[row][column])
         entries[counter].grid(row=row+1, column=column+1)
         counter += 1
@@ -354,7 +354,7 @@ counter = 0
 for row in range(tableheight):
     for column in range(tablewidth):
         entries_mid_power[counter] = Entry(
-            mid_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'))
+            mid_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'), justify=CENTER)
         entries_mid_power[counter].insert(
             END, string=powermap_mid[row][column])
         entries_mid_power[counter].grid(row=row+1, column=column+1)
@@ -365,7 +365,7 @@ counter = 0
 for row in range(tableheight):
     for column in range(tablewidth):
         entries_low_power[counter] = Entry(
-            low_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'))
+            low_powermap_tab, width=WIDTH_ENTRIES, validate='all', validatecommand=(vcmd_digits, '%P'), justify=CENTER)
         entries_low_power[counter].insert(
             END, string=powermap_low[row][column])
         entries_low_power[counter].grid(row=row+1, column=column+1)
