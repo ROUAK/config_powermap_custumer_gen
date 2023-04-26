@@ -152,7 +152,7 @@ def reset_powermap_to_Zero():
 
 ###################################################################################################################################
 # ---------------------------- Layout GUI ------------------------------- #
-reset_button = Button(text="Reset Powermap to Goupil",
+reset_button = Button(text="Eve Powermap 3P (A)",
                       command=reset_powermap_to_Goupil)
 reset_button.grid(row=0, column=0, columnspan=4, pady=5)
 
